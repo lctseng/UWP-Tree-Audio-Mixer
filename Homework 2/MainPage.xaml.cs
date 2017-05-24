@@ -26,6 +26,7 @@ namespace Homework_2
 
         private MainPage rootPage;
         public static MainPage Current;
+        private MixerTree tree;
 
 
         public MainPage()
@@ -33,6 +34,7 @@ namespace Homework_2
             this.InitializeComponent();
             Current = this;
             rootPage = this;
+            tree = new MixerTree(TreeDisplay);
         }
 
         /// <summary>
@@ -87,7 +89,20 @@ namespace Homework_2
         {
             Splitter.IsPaneOpen = !Splitter.IsPaneOpen;
             
-        }   
+        }
+
+        private async void LoadInitTree(object sender, RoutedEventArgs e)
+        {
+            bool result = await tree.LoadInitFile();
+            if (result) { 
+                tree.Play();
+            }
+        }
+
+        private void RefreshTree(object sener, RoutedEventArgs e)
+        {
+            tree.RefreshUI();
+        }
     }
 
     public enum NotifyType
