@@ -30,22 +30,24 @@ namespace Homework_2
 
         AudioGraph graph;
 
-        
+
 
         private bool playing;
 
         private Node rootNode;
         public Node editingNode;
 
-        public enum NodeType {
+        public enum NodeType
+        {
             Input, Output, Mixer
         }
 
 
-        public class Node {
+        public class Node
+        {
             public List<Node> outGoingNodes;
             public List<Node> incomingNodes;
-            
+
             public IAudioNode audioNode;
             public NodeType type;
 
@@ -64,7 +66,8 @@ namespace Homework_2
 
             public bool limiterEnabled, eqEnabled;
 
-            public Node() {
+            public Node()
+            {
                 outGoingNodes = new List<Node>();
                 incomingNodes = new List<Node>();
                 elementHeight = 0;
@@ -74,8 +77,9 @@ namespace Homework_2
                 eqEnabled = false;
             }
 
-            public virtual void AddOutgoingConnection(Node target) {
-                
+            public virtual void AddOutgoingConnection(Node target)
+            {
+
             }
 
             public virtual void RemoveOutgoingConnection(Node target)
@@ -83,7 +87,13 @@ namespace Homework_2
 
             }
 
-            public virtual Button CreateUIButtom() {
+            public IAudioNode GetNode()
+            {
+                return audioNode;
+            }
+
+            public virtual Button CreateUIButtom()
+            {
                 var btn = currentButton = new Button();
                 btn.Content = name;
                 btn.Width = BUTTON_WIDTH;
@@ -93,14 +103,18 @@ namespace Homework_2
                 return btn;
             }
 
-            protected void PropagateSortIndex(Node parent) {
+            protected void PropagateSortIndex(Node parent)
+            {
             }
+
         }
 
-        public class InputNode : Node{
+        public class InputNode : Node
+        {
 
 
-            public InputNode() {
+            public InputNode()
+            {
                 type = NodeType.Input;
                 name = "Input File " + serial;
             }
@@ -134,13 +148,14 @@ namespace Homework_2
                 return btn;
             }
 
-            public AudioFileInputNode GetNode()
+            public new AudioFileInputNode GetNode()
             {
                 return ((AudioFileInputNode)this.audioNode);
             }
         }
 
-        public class OutputNode : Node {
+        public class OutputNode : Node
+        {
             public OutputNode()
             {
                 type = NodeType.Output;
@@ -152,7 +167,7 @@ namespace Homework_2
                 MainPage.Current.NotifyUser("Cannot add outgoing node to output device", NotifyType.ErrorMessage);
             }
 
-            public AudioDeviceOutputNode GetNode()
+            public new AudioDeviceOutputNode GetNode()
             {
                 return ((AudioDeviceOutputNode)this.audioNode);
             }
@@ -193,7 +208,8 @@ namespace Homework_2
 
             }
 
-            public AudioSubmixNode GetNode() {
+            public new AudioSubmixNode GetNode()
+            {
                 return ((AudioSubmixNode)this.audioNode);
             }
 
@@ -206,7 +222,8 @@ namespace Homework_2
             }
         }
 
-        class MixerAnchor {
+        class MixerAnchor
+        {
             public Node src;
             public Node dst;
             public Button anchor;
@@ -225,13 +242,17 @@ namespace Homework_2
 
         private async void InitializeTreeAsync()
         {
-            await CreateAudioGraph();;
-            rootNode = await CreateDeviceOutputNode();
-            RefreshUI();
+            await CreateAudioGraph(); ;
+            if (graph != null)
+            {
+                rootNode = await CreateDeviceOutputNode();
+                RefreshUI();
+            }
         }
 
         // this is test only
-        public async Task<bool> LoadInitFile() {
+        public async Task<bool> LoadInitFile()
+        {
             Stop();
             // init node
             var initInputNode = await CreateFileInputNode();
@@ -243,14 +264,17 @@ namespace Homework_2
             return false;
         }
 
-        public void Play() {
-            if (!playing) {
+        public void Play()
+        {
+            if (!playing)
+            {
                 graph.Start();
                 playing = true;
             }
         }
 
-        public void Stop() {
+        public void Stop()
+        {
             if (playing)
             {
                 graph.Stop();
@@ -264,49 +288,65 @@ namespace Homework_2
             {
                 Stop();
             }
-            else {
+            else
+            {
                 Play();
             }
         }
 
+        public void AttachEffect(Node node)
+        {
+            CreateLimiterEffect(node);
+            CreateEqEffect(node);
+        }
+
         private void CreateLimiterEffect(Node node)
         {
-            // Create limiter effect
-            node.limiterEffectDefinition = new LimiterEffectDefinition(graph);
+            if (node.limiterEffectDefinition == null)
+            {
+                // Create limiter effect
+                node.limiterEffectDefinition = new LimiterEffectDefinition(graph);
 
-            node.limiterEffectDefinition.Loudness = 1000;
-            node.limiterEffectDefinition.Release = 10;
+                node.limiterEffectDefinition.Loudness = 1000;
+                node.limiterEffectDefinition.Release = 10;
 
-            node.audioNode.EffectDefinitions.Add(node.limiterEffectDefinition);
-            node.audioNode.DisableEffectsByDefinition(node.limiterEffectDefinition);
+                node.GetNode().EffectDefinitions.Add(node.limiterEffectDefinition);
+                node.GetNode().DisableEffectsByDefinition(node.limiterEffectDefinition);
+            }
         }
+
+
 
         private void CreateEqEffect(Node node)
         {
-            // See the MSDN page for parameter explanations
-            // https://msdn.microsoft.com/en-us/library/windows/desktop/microsoft.directx_sdk.xapofx.fxeq_parameters(v=vs.85).aspx
-            var eqEffectDefinition = node.eqEffectDefinition = new EqualizerEffectDefinition(graph);
-            eqEffectDefinition.Bands[0].FrequencyCenter = 100.0f;
-            eqEffectDefinition.Bands[0].Gain = 4.033f;
-            eqEffectDefinition.Bands[0].Bandwidth = 1.5f;
+            if (node.eqEffectDefinition == null)
+            {
+                // See the MSDN page for parameter explanations
+                // https://msdn.microsoft.com/en-us/library/windows/desktop/microsoft.directx_sdk.xapofx.fxeq_parameters(v=vs.85).aspx
+                var eqEffectDefinition = node.eqEffectDefinition = new EqualizerEffectDefinition(graph);
+                eqEffectDefinition.Bands[0].FrequencyCenter = 100.0f;
+                eqEffectDefinition.Bands[0].Gain = 4.033f;
+                eqEffectDefinition.Bands[0].Bandwidth = 1.5f;
 
-            eqEffectDefinition.Bands[1].FrequencyCenter = 900.0f;
-            eqEffectDefinition.Bands[1].Gain = 1.6888f;
-            eqEffectDefinition.Bands[1].Bandwidth = 1.5f;
+                eqEffectDefinition.Bands[1].FrequencyCenter = 900.0f;
+                eqEffectDefinition.Bands[1].Gain = 1.6888f;
+                eqEffectDefinition.Bands[1].Bandwidth = 1.5f;
 
-            eqEffectDefinition.Bands[2].FrequencyCenter = 5000.0f;
-            eqEffectDefinition.Bands[2].Gain = 2.4702f;
-            eqEffectDefinition.Bands[2].Bandwidth = 1.5f;
+                eqEffectDefinition.Bands[2].FrequencyCenter = 5000.0f;
+                eqEffectDefinition.Bands[2].Gain = 2.4702f;
+                eqEffectDefinition.Bands[2].Bandwidth = 1.5f;
 
-            eqEffectDefinition.Bands[3].FrequencyCenter = 12000.0f;
-            eqEffectDefinition.Bands[3].Gain = 5.5958f;
-            eqEffectDefinition.Bands[3].Bandwidth = 2.0f;
+                eqEffectDefinition.Bands[3].FrequencyCenter = 12000.0f;
+                eqEffectDefinition.Bands[3].Gain = 5.5958f;
+                eqEffectDefinition.Bands[3].Bandwidth = 2.0f;
 
-            node.audioNode.EffectDefinitions.Add(eqEffectDefinition);
-            node.audioNode.DisableEffectsByDefinition(eqEffectDefinition);
+                node.GetNode().EffectDefinitions.Add(eqEffectDefinition);
+                node.GetNode().DisableEffectsByDefinition(eqEffectDefinition);
+            }
         }
 
-        private async Task<OutputNode> CreateDeviceOutputNode() {
+        private async Task<OutputNode> CreateDeviceOutputNode()
+        {
             // Create a device output node
             CreateAudioDeviceOutputNodeResult outputDeviceNodeResult = await graph.CreateDeviceOutputNodeAsync();
 
@@ -325,7 +365,8 @@ namespace Homework_2
             return node;
         }
 
-        private async Task<InputNode> CreateFileInputNode() {
+        private async Task<InputNode> CreateFileInputNode()
+        {
             FileOpenPicker filePicker = new FileOpenPicker();
             filePicker.SuggestedStartLocation = PickerLocationId.MusicLibrary;
             filePicker.FileTypeFilter.Add(".mp3");
@@ -353,8 +394,6 @@ namespace Homework_2
             InputNode node = new InputNode();
             node.audioNode = fileInputResult.FileInputNode;
             node.name = file.Name;
-            CreateLimiterEffect(node);
-            CreateEqEffect(node);
 
             rootPage.NotifyUser("Successfully loaded input file", NotifyType.StatusMessage);
             return node;
@@ -366,8 +405,8 @@ namespace Homework_2
         {
             MixerNode node = new MixerNode();
             node.audioNode = graph.CreateSubmixNode();
-            CreateLimiterEffect(node);
-            CreateEqEffect(node);
+            AttachEffect(node);
+
             return node;
         }
 
@@ -388,7 +427,8 @@ namespace Homework_2
         }
 
 
-        public void RefreshUI() {
+        public void RefreshUI()
+        {
             if (rootNode != null)
             {
                 displayCanvas.Children.Clear();
@@ -396,7 +436,8 @@ namespace Homework_2
             }
         }
 
-        private void DrawTree(Node currentNode, double height, int depth) {
+        private void DrawTree(Node currentNode, double height, int depth)
+        {
             // draw this node
             var currentBtn = currentNode.CreateUIButtom();
             var currentMargin = currentBtn.Margin;
@@ -413,16 +454,17 @@ namespace Homework_2
                 var node = currentNode.incomingNodes[i];
                 DrawTree(node, accuHeight, depth + 1);
                 accuHeight = node.elementHeight;
-                DrawEdge(node, currentNode); 
+                DrawEdge(node, currentNode);
             }
-            if(currentNode.incomingNodes.Count == 0)
+            if (currentNode.incomingNodes.Count == 0)
             {
                 accuHeight += 150;
             }
             currentNode.elementHeight = accuHeight;
         }
 
-        private void DrawEdge(Node src, Node dst) {
+        private void DrawEdge(Node src, Node dst)
+        {
 
             double startX = GetCenterX(src.currentButton);
             double startY = GetCenterY(src.currentButton);
@@ -490,7 +532,7 @@ namespace Homework_2
 
         public double GetCenterX(FrameworkElement e)
         {
-            return e.Margin.Left + e.Width / 2; 
+            return e.Margin.Left + e.Width / 2;
         }
 
         public double GetCenterY(FrameworkElement e)
@@ -540,6 +582,7 @@ namespace Homework_2
             var parent = editingNode;
             var incoming = await CreateFileInputNode();
             incoming.AddOutgoingConnection(parent);
+            AttachEffect(incoming);
             RefreshUI();
 
         }
@@ -561,10 +604,11 @@ namespace Homework_2
         private async Task CreateSiblingInputFor(InputNode node)
         {
             var incoming = await CreateFileInputNode();
-            foreach(var parent in node.outGoingNodes)
+            foreach (var parent in node.outGoingNodes)
             {
                 incoming.AddOutgoingConnection(parent);
             }
+            AttachEffect(incoming);
         }
 
         private void CreateSiblingMixerFor(MixerNode node)
@@ -578,7 +622,7 @@ namespace Homework_2
 
         public void DeleteEditingNode()
         {
-            if(editingNode != null)
+            if (editingNode != null)
             {
                 DeleteNodeRecursively(editingNode);
                 editingNode = null;
@@ -603,16 +647,17 @@ namespace Homework_2
             // break connection to parent
             deletingNodes.Clear();
             deletingNodes.AddRange(node.outGoingNodes);
-            foreach(var parentNode in deletingNodes)
+            foreach (var parentNode in deletingNodes)
             {
                 node.RemoveOutgoingConnection(parentNode);
             }
         }
 
 
-        public bool IsPlaying() {
+        public bool IsPlaying()
+        {
             return playing;
         }
     }
-    
+
 }

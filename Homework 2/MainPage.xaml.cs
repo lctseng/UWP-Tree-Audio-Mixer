@@ -88,6 +88,7 @@ namespace Homework_2
             }
         }
 
+
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             Splitter.IsPaneOpen = !Splitter.IsPaneOpen;
