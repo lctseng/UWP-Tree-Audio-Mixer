@@ -35,6 +35,7 @@ namespace Homework_2
             Current = this;
             rootPage = this;
             tree = new MixerTree(TreeDisplay);
+            RefreshControlPanel(null);
         }
 
         /// <summary>
@@ -122,33 +123,50 @@ namespace Homework_2
         {
             var button = (Button)sender;
             var node = (MixerTree.Node)button.Tag;
-            tree.editingNode = node;
-            TextForNode.Text = node.name;
-            // force open panel
-            Splitter.IsPaneOpen = true;
-            LinkPanel.Visibility = Visibility.Visible;
-            // open effect panel for input/mixer
-            if (node.type == MixerTree.NodeType.Input || node.type == MixerTree.NodeType.Mixer)
+            RefreshControlPanel(node);
+        }
+
+        public void RefreshControlPanel(MixerTree.Node node)
+        {
+            if(node != null)
             {
-                EffectPanel.Visibility = Visibility.Visible;
+                tree.editingNode = node;
+                TextForNode.Text = node.name;
+                // force open panel
+                Splitter.IsPaneOpen = true;
+                LinkPanel.Visibility = Visibility.Visible;
+                // open effect panel for input/mixer
+                if (node.type == MixerTree.NodeType.Input || node.type == MixerTree.NodeType.Mixer)
+                {
+                    EffectPanel.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    EffectPanel.Visibility = Visibility.Collapsed;
+                }
+                // open input panel for input
+                if (node.type == MixerTree.NodeType.Input)
+                {
+                    InputPanel.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    InputPanel.Visibility = Visibility.Collapsed;
+                }
+                // enable sibling button for mixer and incoming
+                ButtonCreateSibling.IsEnabled = node.type == MixerTree.NodeType.Input || node.type == MixerTree.NodeType.Mixer;
+                // enable incoming for mixer and output
+                ButtonCreateIncoming.IsEnabled = node.type == MixerTree.NodeType.Output || node.type == MixerTree.NodeType.Mixer;
+                // enable delete button for non-output node
+                ButtonDelete.IsEnabled = node.type != MixerTree.NodeType.Output;
             }
             else
             {
+                TextForNode.Text = "(No node selected)";
+                LinkPanel.Visibility = Visibility.Collapsed;
                 EffectPanel.Visibility = Visibility.Collapsed;
-            }
-            // open input panel for input
-            if (node.type == MixerTree.NodeType.Input)
-            {
-                InputPanel.Visibility = Visibility.Visible;
-            }
-            else
-            {
                 InputPanel.Visibility = Visibility.Collapsed;
             }
-            // enable sibling button for mixer and incoming
-            ButtonCreateSibling.IsEnabled = node.type == MixerTree.NodeType.Input || node.type == MixerTree.NodeType.Mixer;
-            // enable incoming for mixer and output
-            ButtonCreateIncoming.IsEnabled = node.type == MixerTree.NodeType.Output || node.type == MixerTree.NodeType.Mixer;
         }
 
         public async void LinkButton_Incoming_Click(object sender, RoutedEventArgs e)
@@ -160,6 +178,13 @@ namespace Homework_2
         {
             await tree.CreateSiblingForEditing();
         }
+
+        private void LinkButton_Delete_Click(object sender, RoutedEventArgs e)
+        {
+            tree.DeleteEditingNode();
+            RefreshControlPanel(null);
+        }
+        
     }
 
     public enum NotifyType

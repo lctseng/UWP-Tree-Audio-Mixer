@@ -56,6 +56,9 @@ namespace Homework_2
 
             public string name;
 
+            public Line line1, line2;
+            public Button anchor;
+
             public Node() {
                 outGoingNodes = new List<Node>();
                 incomingNodes = new List<Node>();
@@ -390,10 +393,12 @@ namespace Homework_2
             // mixer anchor 
             var anchor = DrawMixerAnchor(midX, midY);
             var data = (MixerAnchor)anchor.Tag;
-            data.line1 = line1;
-            data.line2 = line2;
+            src.line1 = data.line1 = line1;
+            src.line2 = data.line2 = line2;
             data.src = src;
             data.dst = dst;
+            src.anchor = anchor;
+
 
 
 
@@ -525,6 +530,40 @@ namespace Homework_2
                 incoming.AddOutgoingConnection(parent);
             }
         }
+
+        public void DeleteEditingNode()
+        {
+            if(editingNode != null)
+            {
+                DeleteNodeRecursively(editingNode);
+                editingNode = null;
+                RefreshUI();
+            }
+        }
+
+        private void DeleteNodeRecursively(Node node)
+        {
+            // delete children first
+            var deletingNodes = new List<Node>();
+            deletingNodes.AddRange(node.incomingNodes);
+            foreach (var childNode in deletingNodes)
+            {
+                DeleteNodeRecursively(childNode);
+            }
+            // remove UI
+            displayCanvas.Children.Remove(node.line1);
+            displayCanvas.Children.Remove(node.line2);
+            displayCanvas.Children.Remove(node.anchor);
+            displayCanvas.Children.Remove(node.currentButton);
+            // break connection to parent
+            deletingNodes.Clear();
+            deletingNodes.AddRange(node.outGoingNodes);
+            foreach(var parentNode in deletingNodes)
+            {
+                node.RemoveOutgoingConnection(parentNode);
+            }
+        }
+
 
         public bool IsPlaying() {
             return playing;
