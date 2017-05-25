@@ -443,7 +443,7 @@ namespace Homework_2
             if (rootNode != null)
             {
                 displayCanvas.Children.Clear();
-                DrawTree(rootNode, 0, 1);
+                DrawTree(rootNode, 50, 1);
             }
         }
 
@@ -592,9 +592,11 @@ namespace Homework_2
         {
             var parent = editingNode;
             var incoming = await CreateFileInputNode();
-            incoming.AddOutgoingConnection(parent);
-            AttachEffect(incoming);
-            RefreshUI();
+            if(incoming != null) { 
+                incoming.AddOutgoingConnection(parent);
+                AttachEffect(incoming);
+                RefreshUI();
+            }
 
         }
 
@@ -615,11 +617,13 @@ namespace Homework_2
         private async Task CreateSiblingInputFor(InputNode node)
         {
             var incoming = await CreateFileInputNode();
-            foreach (var parent in node.outGoingNodes)
-            {
-                incoming.AddOutgoingConnection(parent);
+            if (incoming != null) { 
+                foreach (var parent in node.outGoingNodes)
+                {
+                    incoming.AddOutgoingConnection(parent);
+                }
+                AttachEffect(incoming);
             }
-            AttachEffect(incoming);
         }
 
         private void CreateSiblingMixerFor(MixerNode node)
