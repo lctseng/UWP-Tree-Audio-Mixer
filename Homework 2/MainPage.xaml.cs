@@ -36,8 +36,22 @@ namespace Homework_2
             this.InitializeComponent();
             Current = this;
             rootPage = this;
+            
+        }
+
+        protected override async void OnNavigatedTo(NavigationEventArgs e)
+        {
             tree = new MixerTree(TreeDisplay);
             RefreshControlPanel(null);
+        }
+
+        protected override void OnNavigatedFrom(NavigationEventArgs e)
+        {
+            // Destroy the graph if the page is naviated away from
+            if (tree != null)
+            {
+                tree.Dispose();
+            }
         }
 
         /// <summary>
@@ -133,6 +147,7 @@ namespace Homework_2
         {
             if(node != null)
             {
+                TextForNode.IsReadOnly = false;
                 tree.editingNode = node;
                 TextForNode.Text = node.name;
                 // force open panel
@@ -175,6 +190,7 @@ namespace Homework_2
             }
             else
             {
+                TextForNode.IsReadOnly = true;
                 TextForNode.Text = "(No node selected)";
                 LinkPanel.Visibility = Visibility.Collapsed;
                 EffectPanel.Visibility = Visibility.Collapsed;
@@ -448,7 +464,17 @@ namespace Homework_2
             }
         }
 
-
+        private void TextBoxForNode_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (tree != null)
+            {
+                if (tree.editingNode != null)
+                {
+                    //tree.editingNode.name = TextForNode.Text;
+                    //tree.editingNode.currentButton.Content = TextForNode.Text;
+                }
+            }
+        }
     }
 
     public enum NotifyType

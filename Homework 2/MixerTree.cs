@@ -17,7 +17,7 @@ using Windows.UI.Xaml.Shapes;
 namespace Homework_2
 {
 
-    public class MixerTree
+    public class MixerTree : IDisposable
     {
 
         public static int btnCounter = 0;
@@ -43,8 +43,7 @@ namespace Homework_2
         }
 
 
-        public class Node
-        {
+        public class Node : IDisposable{
             public List<Node> outGoingNodes;
             public List<Node> incomingNodes;
 
@@ -107,6 +106,21 @@ namespace Homework_2
             {
             }
 
+            public void Dispose()
+            {
+                if (audioNode != null)
+                {
+                    audioNode.Dispose();
+                }
+            }
+
+            public void Dispose()
+            {
+                if (audioNode != null)
+                {
+                    audioNode.Dispose();
+                }
+            }
         }
 
         public class InputNode : Node
@@ -133,7 +147,6 @@ namespace Homework_2
             public override void RemoveOutgoingConnection(Node target)
             {
                 GetNode().RemoveOutgoingConnection(target.audioNode);
-
                 outGoingNodes.Remove(target);
                 target.incomingNodes.Remove(this);
 
@@ -651,12 +664,24 @@ namespace Homework_2
             {
                 node.RemoveOutgoingConnection(parentNode);
             }
+            // dispose node
+            node.Dispose();
         }
 
 
         public bool IsPlaying()
         {
             return playing;
+        }
+
+        public void Dispose()
+        {
+            if(graph != null)
+            {
+                DeleteNodeRecursively(rootNode);
+                graph.Dispose();
+                graph = null;
+            }
         }
     }
 
