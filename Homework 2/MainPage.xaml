@@ -28,18 +28,36 @@
         <SplitView x:Name="Splitter" IsPaneOpen="True" Grid.Column="1" DisplayMode="Inline" Grid.Row="1">
             <SplitView.Pane>
                 <RelativePanel Margin="10,0,0,0">
-                    <TextBlock x:Name="SampleTitle" Text="Audio Effect Control" TextWrapping="Wrap" Margin="0,10,0,0"/>
-                    
+                    <TextBlock Text="Audio Effect Control" TextWrapping="Wrap" Margin="0,10,0,0"/>
+                    <TextBlock Name="TextForNode" Text="(No node selected)" TextWrapping="Wrap" Foreground="Red" Margin="148,10,-255,0"/>
+                    <RelativePanel Visibility="Collapsed" Name="LinkPanel" Margin="0,35,-310,-53" >
+                        <Button x:Name="ButtonCreateIncoming" Content="+ Incoming"  Height="32" Margin="100,0,-98,0" Width="100" Click="LinkButton_Incoming_Click" />
+                        <Button x:Name="ButtonCreateSibling" Content="+ Sibling"  Height="32"  Width="100" Click="LinkButton_Sibling_Click" Margin="-5,0,0,0"/>
+                        <Button x:Name="ButtonDelete" Content="Delete"  Background="Red" Foreground="White" Height="32"  Width="100" Click="LinkButton_Delete_Click" Margin="205,0,-205,0"/>
+                    </RelativePanel>
+                    <StackPanel Visibility="Collapsed" Name="EffectPanel" Orientation="Vertical" Margin="0,159,-300,-304" >
+                        <Button Name="button2" Content="Effect" HorizontalAlignment="Left" Height="32" VerticalAlignment="Top" Width="65"/>
+
+                    </StackPanel>
+                    <StackPanel Visibility="Collapsed" Name="InputPanel" Orientation="Vertical" Margin="0,309,-300,-471">
+                        <Button x:Name="button3" Content="Input" HorizontalAlignment="Left" Height="32" VerticalAlignment="Top" Width="65"/>
+
+                    </StackPanel>
                     <StackPanel x:Name="FooterPanel" Orientation="Vertical" RelativePanel.AlignBottomWithPanel="True">
                         <Image Source="Assets/Square44x44Logo.scale-200.png" AutomationProperties.Name="Logo" Stretch="None" HorizontalAlignment="Left" Margin="10,0,0,0"/>
                         <TextBlock x:Name="Copyright" Text="&#xA9; Liang-Chi Tseng (NTU). All rights reserved."
                                    RelativePanel.Above="LinksPanel" Margin="10,10,0,0"
                                    TextWrapping="Wrap"/>
                     </StackPanel>
+
                 </RelativePanel>
             </SplitView.Pane>
             <RelativePanel>
-                <Frame x:Name="ScenarioFrame" Margin="33,0,-33,5" RelativePanel.AlignTopWithPanel="True" RelativePanel.Above="StatusPanel" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignLeftWithPanel="True"/>
+                <Canvas x:Name="TreeDisplay" Margin="0,0,0,5" RelativePanel.AlignTopWithPanel="True" RelativePanel.Above="StatusPanel" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignLeftWithPanel="True">
+
+                </Canvas>
+                <Button x:Name="buttonPlay" Content="Play" HorizontalAlignment="Left" Margin="0,69,0,53" VerticalAlignment="Stretch" Click="ButtonPlay_Click"/>
+                <Button x:Name="buttonRefresh" Content="Refresh Tree" Canvas.Left="105" Canvas.Top="129" Click="RefreshTree" Margin="0,125,0,-125"/>
                 <StackPanel x:Name="StatusPanel" Orientation="Vertical" RelativePanel.AlignBottomWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignLeftWithPanel="True">
                     <TextBlock x:Name="StatusLabel" Margin="10,0,0,10" TextWrapping="Wrap" Text="Status:" />
                     <Border x:Name="StatusBorder" Margin="0,0,0,0">
