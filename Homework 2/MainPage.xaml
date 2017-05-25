@@ -54,8 +54,8 @@
                 <Canvas x:Name="TreeDisplay" Margin="0,0,0,5" RelativePanel.AlignTopWithPanel="True" RelativePanel.Above="StatusPanel" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignLeftWithPanel="True">
 
                 </Canvas>
-                <Button x:Name="button" Content="Button" HorizontalAlignment="Left" Margin="135,204,-14,-82" VerticalAlignment="Stretch" Click="LoadInitTree"/>
-                <Button x:Name="button1" Content="Refresh Tree" Canvas.Left="105" Canvas.Top="129" Click="RefreshTree" Margin="0,204,0,-204"/>
+                <Button x:Name="buttonPlay" Content="Play" HorizontalAlignment="Left" Margin="0,69,0,53" VerticalAlignment="Stretch" Click="ButtonPlay_Click"/>
+                <Button x:Name="buttonRefresh" Content="Refresh Tree" Canvas.Left="105" Canvas.Top="129" Click="RefreshTree" Margin="0,125,0,-125"/>
                 <StackPanel x:Name="StatusPanel" Orientation="Vertical" RelativePanel.AlignBottomWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignLeftWithPanel="True">
                     <TextBlock x:Name="StatusLabel" Margin="10,0,0,10" TextWrapping="Wrap" Text="Status:" />
                     <Border x:Name="StatusBorder" Margin="0,0,0,0">

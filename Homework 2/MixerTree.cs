@@ -20,6 +20,8 @@ namespace Homework_2
     public class MixerTree
     {
 
+        public static int btnCounter = 0;
+
         const int BUTTON_WIDTH = 150;
         const int BUTTON_HEIGHT = 50;
 
@@ -47,20 +49,25 @@ namespace Homework_2
             public IAudioNode audioNode;
             public NodeType type;
 
-            public int sortIndex;
-            public int childSerial;
-
             public Button currentButton;
+
+            public double elementHeight;
+            public int serial;
 
             public Node() {
                 outGoingNodes = new List<Node>();
                 incomingNodes = new List<Node>();
-                sortIndex = 1;
-                childSerial = 0;
+                elementHeight = 0;
+                serial = btnCounter++;
             }
 
             public virtual void AddOutgoingConnection(Node target) {
                 
+            }
+
+            public virtual void RemoveOutgoingConnection(Node target)
+            {
+
             }
 
             public virtual Button CreateUIButtom() {
@@ -74,8 +81,8 @@ namespace Homework_2
             }
 
             protected void PropagateSortIndex(Node parent) {
-                this.sortIndex = parent.sortIndex + 1;
-                parent.childSerial++;
+                //this.sortIndex = parent.sortIndex + 1;
+                //parent.childSerial++;
             }
         }
 
@@ -94,10 +101,22 @@ namespace Homework_2
                 PropagateSortIndex(target);
 
             }
+
+            public override void RemoveOutgoingConnection(Node target)
+            {
+                GetNode().RemoveOutgoingConnection(target.audioNode);
+
+                outGoingNodes.Remove(target);
+                target.incomingNodes.Remove(this);
+
+            }
+
+
+
             public override Button CreateUIButtom()
             {
                 var btn = base.CreateUIButtom();
-                btn.Content = "Input File";
+                btn.Content = "Input File" + serial;
                 return btn;
             }
 
@@ -149,6 +168,15 @@ namespace Homework_2
 
             }
 
+            public override void RemoveOutgoingConnection(Node target)
+            {
+                GetNode().RemoveOutgoingConnection(target.audioNode);
+
+                outGoingNodes.Remove(target);
+                target.incomingNodes.Remove(this);
+
+            }
+
             public AudioSubmixNode GetNode() {
                 return ((AudioSubmixNode)this.audioNode);
             }
@@ -156,8 +184,7 @@ namespace Homework_2
             public override Button CreateUIButtom()
             {
                 var btn = base.CreateUIButtom();
-                btn.Width = BUTTON_HEIGHT;
-                btn.Content = "Mix";
+                btn.Content = "Mixer" + serial;
                 btn.Background = new SolidColorBrush(Colors.DarkCyan);
                 return btn;
             }
@@ -184,6 +211,7 @@ namespace Homework_2
         {
             await CreateAudioGraph();;
             rootNode = await CreateDeviceOutputNode();
+            RefreshUI();
         }
 
         // this is test only
@@ -298,37 +326,34 @@ namespace Homework_2
             if (rootNode != null)
             {
                 displayCanvas.Children.Clear();
-                DrawTree();
+                DrawTree(rootNode, 0, 1);
             }
         }
 
-        private void DrawTree() {
-            List<Node> nextLayerNodes = new List<Node>();
-            Queue<Node> todos = new Queue<Node>() ;
-            todos.Enqueue(rootNode);
-            // draw root node
-            var rootBtn = rootNode.CreateUIButtom();
-            displayCanvas.Children.Add(rootBtn);
-            Canvas.SetZIndex(rootBtn, rootNode.sortIndex);
-            // Launch a BFS
-            while (todos.Count > 0)
-            {
-                var currentNode = todos.Dequeue();
+        private void DrawTree(Node currentNode, double height, int depth) {
+            // draw this node
+            var currentBtn = currentNode.CreateUIButtom();
+            var currentMargin = currentBtn.Margin;
+            currentMargin.Left = (depth - 1) * 250;
+            currentMargin.Top = height;
+            currentBtn.Margin = currentMargin;
 
-                for (int i = 0; i < currentNode.incomingNodes.Count; i++) {
-                    // draw this node
-                    var node = currentNode.incomingNodes[i];
-                    var button = node.CreateUIButtom();
-                    var margin = button.Margin;
-                    margin.Left = (node.sortIndex - 1) * 250;
-                    margin.Top = i * 150;
-                    button.Margin = margin;
-                    displayCanvas.Children.Add(button);
-                    Canvas.SetZIndex(button, node.sortIndex);
-                    todos.Enqueue(node);
-                    DrawEdge(node, currentNode);
-                }
+            displayCanvas.Children.Add(currentBtn);
+            Canvas.SetZIndex(currentBtn, depth);
+            // draw  its child
+            double accuHeight = height;
+            for (int i = 0; i < currentNode.incomingNodes.Count; i++)
+            {
+                var node = currentNode.incomingNodes[i];
+                DrawTree(node, accuHeight, depth + 1);
+                accuHeight = node.elementHeight;
+                DrawEdge(node, currentNode); 
             }
+            if(currentNode.incomingNodes.Count == 0)
+            {
+                accuHeight += 150;
+            }
+            currentNode.elementHeight = accuHeight;
         }
 
         private void DrawEdge(Node src, Node dst) {
@@ -409,6 +434,7 @@ namespace Homework_2
         {
             // create btn
             var mixer = new MixerNode();
+            mixer.audioNode = graph.CreateSubmixNode();
             var btn = mixer.CreateUIButtom();
             displayCanvas.Children.Add(btn);
             // positioning
@@ -417,6 +443,20 @@ namespace Homework_2
             margin.Top = anchorData.centerY - BUTTON_HEIGHT / 2;
 
             btn.Margin = margin;
+            // relinking
+            // remove two old link
+            displayCanvas.Children.Remove(anchorData.line1);
+            displayCanvas.Children.Remove(anchorData.line2);
+            anchorData.src.RemoveOutgoingConnection(anchorData.dst);
+            // make link for two side
+            // link mixer to dst
+            mixer.AddOutgoingConnection(anchorData.dst);
+            DrawEdge(mixer, anchorData.dst);
+            // link src to mixer
+            anchorData.src.AddOutgoingConnection(mixer);
+            DrawEdge(anchorData.src, mixer);
+            RefreshUI();
+
         }
 
         public void MixerAnchor_Click(object sender, RoutedEventArgs e)
@@ -428,14 +468,23 @@ namespace Homework_2
             CreateMixerFromClick((MixerAnchor)btn.Tag);
         }
 
-        public void CreateIncomingFor(Node parent)
+        public async Task CreateIncomingForEditing()
         {
+            var parent = editingNode;
+            var incoming = await CreateFileInputNode();
+            incoming.AddOutgoingConnection(parent);
+            RefreshUI();
 
         }
 
-        public void CreateSiblingFor(Node parent)
+        public async Task CreateSiblingForEditing()
         {
+            var parent = editingNode;
+            await CreateIncomingForEditing();
+        }
 
+        public bool IsPlaying() {
+            return playing;
         }
     }
     

@@ -97,6 +97,19 @@ namespace Homework_2
             if (result)
             {
                 tree.Play();
+                tree.RefreshUI();
+            }
+        }
+
+        private void ButtonPlay_Click(object sender, RoutedEventArgs e)
+        {
+            tree.TogglePlay();
+            if (tree.IsPlaying())
+            {
+                buttonPlay.Content = "Stop";
+            }
+            else {
+                buttonPlay.Content = "Play";
             }
         }
 
@@ -137,18 +150,14 @@ namespace Homework_2
             ButtonCreateIncoming.IsEnabled = node.type == MixerTree.NodeType.Output || node.type == MixerTree.NodeType.Mixer;
         }
 
-        public void LinkButton_Incoming_Click(object sender, RoutedEventArgs e)
+        public async void LinkButton_Incoming_Click(object sender, RoutedEventArgs e)
         {
-            var button = (Button)sender;
-            var node = (MixerTree.Node)button.Tag;
-            tree.CreateIncomingFor(node);
+            await tree.CreateIncomingForEditing();
         }
 
-        private void LinkButton_Sibling_Click(object sender, RoutedEventArgs e)
+        private async void LinkButton_Sibling_Click(object sender, RoutedEventArgs e)
         {
-            var button = (Button)sender;
-            var node = (MixerTree.Node)button.Tag;
-            tree.CreateSiblingFor(node);
+            await tree.CreateSiblingForEditing();
         }
     }
 
