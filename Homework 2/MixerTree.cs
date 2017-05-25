@@ -59,12 +59,19 @@ namespace Homework_2
             public Line line1, line2;
             public Button anchor;
 
+            public LimiterEffectDefinition limiterEffectDefinition;
+            public EqualizerEffectDefinition eqEffectDefinition;
+
+            public bool limiterEnabled, eqEnabled;
+
             public Node() {
                 outGoingNodes = new List<Node>();
                 incomingNodes = new List<Node>();
                 elementHeight = 0;
                 serial = btnCounter++;
                 name = "Dummy Node";
+                limiterEnabled = false;
+                eqEnabled = false;
             }
 
             public virtual void AddOutgoingConnection(Node target) {
@@ -264,6 +271,43 @@ namespace Homework_2
             }
         }
 
+        private void CreateLimiterEffect(Node node)
+        {
+            // Create limiter effect
+            node.limiterEffectDefinition = new LimiterEffectDefinition(graph);
+
+            node.limiterEffectDefinition.Loudness = 1000;
+            node.limiterEffectDefinition.Release = 10;
+
+            node.audioNode.EffectDefinitions.Add(node.limiterEffectDefinition);
+            node.audioNode.DisableEffectsByDefinition(node.limiterEffectDefinition);
+        }
+
+        private void CreateEqEffect(Node node)
+        {
+            // See the MSDN page for parameter explanations
+            // https://msdn.microsoft.com/en-us/library/windows/desktop/microsoft.directx_sdk.xapofx.fxeq_parameters(v=vs.85).aspx
+            var eqEffectDefinition = node.eqEffectDefinition = new EqualizerEffectDefinition(graph);
+            eqEffectDefinition.Bands[0].FrequencyCenter = 100.0f;
+            eqEffectDefinition.Bands[0].Gain = 4.033f;
+            eqEffectDefinition.Bands[0].Bandwidth = 1.5f;
+
+            eqEffectDefinition.Bands[1].FrequencyCenter = 900.0f;
+            eqEffectDefinition.Bands[1].Gain = 1.6888f;
+            eqEffectDefinition.Bands[1].Bandwidth = 1.5f;
+
+            eqEffectDefinition.Bands[2].FrequencyCenter = 5000.0f;
+            eqEffectDefinition.Bands[2].Gain = 2.4702f;
+            eqEffectDefinition.Bands[2].Bandwidth = 1.5f;
+
+            eqEffectDefinition.Bands[3].FrequencyCenter = 12000.0f;
+            eqEffectDefinition.Bands[3].Gain = 5.5958f;
+            eqEffectDefinition.Bands[3].Bandwidth = 2.0f;
+
+            node.audioNode.EffectDefinitions.Add(eqEffectDefinition);
+            node.audioNode.DisableEffectsByDefinition(eqEffectDefinition);
+        }
+
         private async Task<OutputNode> CreateDeviceOutputNode() {
             // Create a device output node
             CreateAudioDeviceOutputNodeResult outputDeviceNodeResult = await graph.CreateDeviceOutputNodeAsync();
@@ -311,6 +355,8 @@ namespace Homework_2
             InputNode node = new InputNode();
             node.audioNode = fileInputResult.FileInputNode;
             node.name = file.Name;
+            CreateLimiterEffect(node);
+            CreateEqEffect(node);
 
             rootPage.NotifyUser("Successfully loaded input file", NotifyType.StatusMessage);
             return node;
@@ -322,6 +368,8 @@ namespace Homework_2
         {
             MixerNode node = new MixerNode();
             node.audioNode = graph.CreateSubmixNode();
+            CreateLimiterEffect(node);
+            CreateEqEffect(node);
             return node;
         }
 
