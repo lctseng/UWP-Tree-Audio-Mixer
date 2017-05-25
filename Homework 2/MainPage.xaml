@@ -28,7 +28,8 @@
         <SplitView x:Name="Splitter" IsPaneOpen="True" Grid.Column="1" DisplayMode="Inline" Grid.Row="1">
             <SplitView.Pane>
                 <RelativePanel Margin="10,0,0,0">
-                    <TextBlock Name="SampleTitle" Text="Audio Effect Control" TextWrapping="Wrap" Margin="0,10,0,0"/>
+                    <TextBlock Text="Audio Effect Control" TextWrapping="Wrap" Margin="0,10,0,0"/>
+                    <TextBlock Name="TextForNode" Text="(No node selected)" TextWrapping="Wrap" Foreground="Red" Margin="148,10,-255,0"/>
                     <RelativePanel Visibility="Collapsed" Name="LinkPanel" Margin="0,35,-310,-53" >
                         <Button Name="ButtonCreateIncoming" Content="Create Incoming"  Height="32" Margin="160,0,-158,0" Width="140" Click="LinkButton_Incoming_Click" />
                         <Button x:Name="ButtonCreateSibling" Content="Create Sibling"  Height="32"  Width="140" Click="LinkButton_Sibling_Click"/>

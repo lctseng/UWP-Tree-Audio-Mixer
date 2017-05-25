@@ -123,6 +123,7 @@ namespace Homework_2
             var button = (Button)sender;
             var node = (MixerTree.Node)button.Tag;
             tree.editingNode = node;
+            TextForNode.Text = node.name;
             // force open panel
             Splitter.IsPaneOpen = true;
             LinkPanel.Visibility = Visibility.Visible;

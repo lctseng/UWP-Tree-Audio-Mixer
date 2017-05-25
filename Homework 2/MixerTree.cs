@@ -54,11 +54,14 @@ namespace Homework_2
             public double elementHeight;
             public int serial;
 
+            public string name;
+
             public Node() {
                 outGoingNodes = new List<Node>();
                 incomingNodes = new List<Node>();
                 elementHeight = 0;
                 serial = btnCounter++;
+                name = "Dummy Node";
             }
 
             public virtual void AddOutgoingConnection(Node target) {
@@ -72,7 +75,7 @@ namespace Homework_2
 
             public virtual Button CreateUIButtom() {
                 var btn = currentButton = new Button();
-                btn.Content = "Dummy Node";
+                btn.Content = name;
                 btn.Width = BUTTON_WIDTH;
                 btn.Height = BUTTON_HEIGHT;
                 btn.Tag = this;
@@ -87,8 +90,12 @@ namespace Homework_2
         }
 
         class InputNode : Node{
+
+            public string filename;
+
             public InputNode() {
                 type = NodeType.Input;
+                name = "Input File " + serial;
             }
 
             public override void AddOutgoingConnection(Node target)
@@ -116,7 +123,7 @@ namespace Homework_2
             public override Button CreateUIButtom()
             {
                 var btn = base.CreateUIButtom();
-                btn.Content = "Input File" + serial;
+                btn.Content = name;
                 return btn;
             }
 
@@ -130,6 +137,7 @@ namespace Homework_2
             public OutputNode()
             {
                 type = NodeType.Output;
+                name = "Output Device";
             }
 
             public override void AddOutgoingConnection(Node target)
@@ -145,7 +153,7 @@ namespace Homework_2
             public override Button CreateUIButtom()
             {
                 var btn = base.CreateUIButtom();
-                btn.Content = "Output Device";
+                btn.Content = name;
                 return btn;
             }
         }
@@ -155,6 +163,7 @@ namespace Homework_2
             public MixerNode()
             {
                 type = NodeType.Mixer;
+                name = "Mixer " + serial;
             }
 
             public override void AddOutgoingConnection(Node target)
@@ -184,7 +193,7 @@ namespace Homework_2
             public override Button CreateUIButtom()
             {
                 var btn = base.CreateUIButtom();
-                btn.Content = "Mixer" + serial;
+                btn.Content = name;
                 btn.Background = new SolidColorBrush(Colors.DarkCyan);
                 return btn;
             }
@@ -299,10 +308,19 @@ namespace Homework_2
 
             InputNode node = new InputNode();
             node.audioNode = fileInputResult.FileInputNode;
+            node.name = file.Name;
 
             rootPage.NotifyUser("Successfully loaded input file", NotifyType.StatusMessage);
             return node;
 
+        }
+
+
+        private MixerNode CreateMixerNode()
+        {
+            MixerNode node = new MixerNode();
+            node.audioNode = graph.CreateSubmixNode();
+            return node;
         }
 
         private async Task CreateAudioGraph()
@@ -433,8 +451,7 @@ namespace Homework_2
         private void CreateMixerFromClick(MixerAnchor anchorData)
         {
             // create btn
-            var mixer = new MixerNode();
-            mixer.audioNode = graph.CreateSubmixNode();
+            var mixer = CreateMixerNode();
             var btn = mixer.CreateUIButtom();
             displayCanvas.Children.Add(btn);
             // positioning
@@ -480,7 +497,33 @@ namespace Homework_2
         public async Task CreateSiblingForEditing()
         {
             var parent = editingNode;
-            await CreateIncomingForEditing();
+            if (parent.type == NodeType.Input)
+            {
+                await CreateSiblingInputFor((InputNode)parent);
+            }
+            else if (parent.type == NodeType.Mixer)
+            {
+                CreateSiblingMixerFor((MixerNode)parent);
+            }
+            RefreshUI();
+        }
+
+        private async Task CreateSiblingInputFor(InputNode node)
+        {
+            var incoming = await CreateFileInputNode();
+            foreach(var parent in node.outGoingNodes)
+            {
+                incoming.AddOutgoingConnection(parent);
+            }
+        }
+
+        private void CreateSiblingMixerFor(MixerNode node)
+        {
+            var incoming = CreateMixerNode();
+            foreach (var parent in node.outGoingNodes)
+            {
+                incoming.AddOutgoingConnection(parent);
+            }
         }
 
         public bool IsPlaying() {
