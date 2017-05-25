@@ -94,8 +94,6 @@ namespace Homework_2
             }
 
             protected void PropagateSortIndex(Node parent) {
-                //this.sortIndex = parent.sortIndex + 1;
-                //parent.childSerial++;
             }
         }
 

@@ -195,6 +195,14 @@ namespace Homework_2
             limiterEffectToggle.IsOn = node.limiterEnabled;
             loudnessSlider.Value = tree.editingNode.limiterEffectDefinition.Loudness;
             UpdateLimiterUI();
+            // update equalizer
+            eqToggle.IsOn = node.eqEnabled;
+            eq1Slider.Value = InverseConvertRange(tree.editingNode.eqEffectDefinition.Bands[0].Gain);
+            eq2Slider.Value = InverseConvertRange(tree.editingNode.eqEffectDefinition.Bands[1].Gain);
+            eq3Slider.Value = InverseConvertRange(tree.editingNode.eqEffectDefinition.Bands[2].Gain);
+            eq4Slider.Value = InverseConvertRange(tree.editingNode.eqEffectDefinition.Bands[3].Gain);
+            UpdateEqualizerUI();
+
         }
 
         public async void LinkButton_Incoming_Click(object sender, RoutedEventArgs e)
@@ -307,6 +315,32 @@ namespace Homework_2
             }
         }
 
+        private void UpdateEqualizerUI()
+        {
+            if (eqToggle.IsOn)
+            {
+                eq1Slider.IsEnabled = true;
+                eq2Slider.IsEnabled = true;
+                eq3Slider.IsEnabled = true;
+                eq4Slider.IsEnabled = true;
+                eq1SliderLabel.Foreground = new SolidColorBrush(Colors.Black);
+                eq2SliderLabel.Foreground = new SolidColorBrush(Colors.Black);
+                eq3SliderLabel.Foreground = new SolidColorBrush(Colors.Black);
+                eq4SliderLabel.Foreground = new SolidColorBrush(Colors.Black);
+            }
+            else
+            {
+                eq1Slider.IsEnabled = false;
+                eq2Slider.IsEnabled = false;
+                eq3Slider.IsEnabled = false;
+                eq4Slider.IsEnabled = false;
+                eq1SliderLabel.Foreground = new SolidColorBrush(Color.FromArgb(255, 74, 74, 74));
+                eq2SliderLabel.Foreground = new SolidColorBrush(Color.FromArgb(255, 74, 74, 74));
+                eq3SliderLabel.Foreground = new SolidColorBrush(Color.FromArgb(255, 74, 74, 74));
+                eq4SliderLabel.Foreground = new SolidColorBrush(Color.FromArgb(255, 74, 74, 74));
+            }
+        }
+
         private void EqToggle_Toggled(object sender, RoutedEventArgs e)
         {
             if (tree != null)
@@ -317,28 +351,14 @@ namespace Homework_2
                     // Also enable/disable the associated UI for effect parameters
                     if (eqToggle.IsOn)
                     {
-                        eq1Slider.IsEnabled = true;
-                        eq2Slider.IsEnabled = true;
-                        eq3Slider.IsEnabled = true;
-                        eq4Slider.IsEnabled = true;
-                        eq1SliderLabel.Foreground = new SolidColorBrush(Colors.Black);
-                        eq2SliderLabel.Foreground = new SolidColorBrush(Colors.Black);
-                        eq3SliderLabel.Foreground = new SolidColorBrush(Colors.Black);
-                        eq4SliderLabel.Foreground = new SolidColorBrush(Colors.Black);
                         tree.editingNode.audioNode.EnableEffectsByDefinition(tree.editingNode.eqEffectDefinition);
                     }
                     else
                     {
-                        eq1Slider.IsEnabled = false;
-                        eq2Slider.IsEnabled = false;
-                        eq3Slider.IsEnabled = false;
-                        eq4Slider.IsEnabled = false;
-                        eq1SliderLabel.Foreground = new SolidColorBrush(Color.FromArgb(255, 74, 74, 74));
-                        eq2SliderLabel.Foreground = new SolidColorBrush(Color.FromArgb(255, 74, 74, 74));
-                        eq3SliderLabel.Foreground = new SolidColorBrush(Color.FromArgb(255, 74, 74, 74));
-                        eq4SliderLabel.Foreground = new SolidColorBrush(Color.FromArgb(255, 74, 74, 74));
                         tree.editingNode.audioNode.DisableEffectsByDefinition(tree.editingNode.eqEffectDefinition);
                     }
+                    tree.editingNode.eqEnabled = eqToggle.IsOn;
+                    UpdateEqualizerUI();
                 }
             }
         }
@@ -352,6 +372,17 @@ namespace Homework_2
 
             double scale = (fxeq_max_gain - fxeq_min_gain) / 100;
             return (fxeq_min_gain + ((value) * scale));
+        }
+        
+        // mapping gain to 0-100
+        private double InverseConvertRange(double gain)
+        {
+            // These are the same values as the ones in xapofx.h
+            const double fxeq_min_gain = 0.126;
+            const double fxeq_max_gain = 7.94;
+
+            double diff = (fxeq_max_gain - fxeq_min_gain);
+            return (gain - fxeq_min_gain)/diff * 100;
         }
 
         // Change effect paramters to reflect UI control
