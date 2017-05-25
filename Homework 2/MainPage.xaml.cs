@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -159,6 +160,11 @@ namespace Homework_2
                 ButtonCreateIncoming.IsEnabled = node.type == MixerTree.NodeType.Output || node.type == MixerTree.NodeType.Mixer;
                 // enable delete button for non-output node
                 ButtonDelete.IsEnabled = node.type != MixerTree.NodeType.Output;
+                // refresh playback control
+                if(node.type == MixerTree.NodeType.Input)
+                {
+                    RefreshPlaybackControl((MixerTree.InputNode)node);
+                }
             }
             else
             {
@@ -167,6 +173,14 @@ namespace Homework_2
                 EffectPanel.Visibility = Visibility.Collapsed;
                 InputPanel.Visibility = Visibility.Collapsed;
             }
+        }
+
+        private void RefreshPlaybackControl(MixerTree.InputNode node)
+        {
+            // refresh loop
+            loopToggle.IsOn = node.GetNode().LoopCount == null;
+            // refresh speed
+            playSpeedSlider.Value = node.GetNode().PlaybackSpeedFactor;
         }
 
         public async void LinkButton_Incoming_Click(object sender, RoutedEventArgs e)
@@ -184,7 +198,48 @@ namespace Homework_2
             tree.DeleteEditingNode();
             RefreshControlPanel(null);
         }
-        
+
+        private void PlaySpeedSlider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+        {
+            if (tree != null)
+            {
+                if (tree.editingNode != null)
+                {
+                    ((MixerTree.InputNode)tree.editingNode).GetNode().PlaybackSpeedFactor = playSpeedSlider.Value;
+                }
+            }
+        }
+
+        private void LoopToggle_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (tree != null)
+            {
+                if (tree.editingNode != null)
+                {
+                    var fileInput = ((MixerTree.InputNode)tree.editingNode).GetNode();
+                    // Set loop count to null for infinite looping
+                    // Set loop count to 0 to stop looping after current iteration
+                    // Set loop count to non-zero value for finite looping
+                    if (loopToggle.IsOn)
+                    {
+                        // If turning on looping, make sure the file hasn't finished playback yet
+                        if (fileInput.Position >= fileInput.Duration - TimeSpan.FromSeconds(1))
+                        {
+                            // If finished playback, seek back to the start time we set
+                            fileInput.Seek(TimeSpan.FromSeconds(0));
+                            
+                        }
+                        fileInput.LoopCount = null; // infinite looping
+                    }
+                    else
+                    {
+                        fileInput.LoopCount = 0; // stop looping
+                    }
+                }
+            }
+        }
+
+
     }
 
     public enum NotifyType

@@ -92,9 +92,8 @@ namespace Homework_2
             }
         }
 
-        class InputNode : Node{
+        public class InputNode : Node{
 
-            public string filename;
 
             public InputNode() {
                 type = NodeType.Input;
@@ -136,7 +135,7 @@ namespace Homework_2
             }
         }
 
-        class OutputNode : Node {
+        public class OutputNode : Node {
             public OutputNode()
             {
                 type = NodeType.Output;
@@ -161,7 +160,7 @@ namespace Homework_2
             }
         }
 
-        class MixerNode : Node
+        public class MixerNode : Node
         {
             public MixerNode()
             {
