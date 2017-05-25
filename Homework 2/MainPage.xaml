@@ -29,12 +29,16 @@
             <SplitView.Pane>
                 <RelativePanel Margin="10,0,0,0">
                     <TextBlock Name="SampleTitle" Text="Audio Effect Control" TextWrapping="Wrap" Margin="0,10,0,0"/>
-                    <StackPanel Visibility="Visible" Name="EffectPanel" Orientation="Vertical" RelativePanel.AlignBottomWithPanel="True" Margin="0,-643,-306,454">
-                        <Button Name="button2" Content="Button" HorizontalAlignment="Left" Height="32" VerticalAlignment="Top" Width="65"/>
-                        
+                    <RelativePanel Visibility="Collapsed" Name="LinkPanel" Margin="0,35,-310,-53" >
+                        <Button Name="ButtonCreateIncoming" Content="Create Incoming"  Height="32" Margin="160,0,-158,0" Width="140" Click="LinkButton_Incoming_Click" />
+                        <Button x:Name="ButtonCreateSibling" Content="Create Sibling"  Height="32"  Width="140" Click="LinkButton_Sibling_Click"/>
+                    </RelativePanel>
+                    <StackPanel Visibility="Collapsed" Name="EffectPanel" Orientation="Vertical" Margin="0,159,-300,-304" >
+                        <Button Name="button2" Content="Effect" HorizontalAlignment="Left" Height="32" VerticalAlignment="Top" Width="65"/>
+
                     </StackPanel>
-                    <StackPanel Visibility="Visible" Name="InputPanel" Orientation="Vertical" RelativePanel.AlignBottomWithPanel="True" Margin="0,-449,-306,176">
-                        <Button x:Name="button3" Content="Button" HorizontalAlignment="Left" Height="32" VerticalAlignment="Top" Width="65"/>
+                    <StackPanel Visibility="Collapsed" Name="InputPanel" Orientation="Vertical" Margin="0,309,-300,-471">
+                        <Button x:Name="button3" Content="Input" HorizontalAlignment="Left" Height="32" VerticalAlignment="Top" Width="65"/>
 
                     </StackPanel>
                     <StackPanel x:Name="FooterPanel" Orientation="Vertical" RelativePanel.AlignBottomWithPanel="True">
@@ -43,12 +47,12 @@
                                    RelativePanel.Above="LinksPanel" Margin="10,10,0,0"
                                    TextWrapping="Wrap"/>
                     </StackPanel>
-                    
+
                 </RelativePanel>
             </SplitView.Pane>
             <RelativePanel>
                 <Canvas x:Name="TreeDisplay" Margin="0,0,0,5" RelativePanel.AlignTopWithPanel="True" RelativePanel.Above="StatusPanel" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignLeftWithPanel="True">
-                    
+
                 </Canvas>
                 <Button x:Name="button" Content="Button" HorizontalAlignment="Left" Margin="135,204,-14,-82" VerticalAlignment="Stretch" Click="LoadInitTree"/>
                 <Button x:Name="button1" Content="Refresh Tree" Canvas.Left="105" Canvas.Top="129" Click="RefreshTree" Margin="0,204,0,-204"/>

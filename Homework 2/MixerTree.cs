@@ -33,6 +33,7 @@ namespace Homework_2
         private bool playing;
 
         private Node rootNode;
+        public Node editingNode;
 
         public enum NodeType {
             Input, Output, Mixer
@@ -67,6 +68,8 @@ namespace Homework_2
                 btn.Content = "Dummy Node";
                 btn.Width = BUTTON_WIDTH;
                 btn.Height = BUTTON_HEIGHT;
+                btn.Tag = this;
+                btn.Click += MainPage.Current.TreeNode_Click;
                 return btn;
             }
 
@@ -423,6 +426,16 @@ namespace Homework_2
             displayCanvas.Children.Remove(btn);
             // Create mixer
             CreateMixerFromClick((MixerAnchor)btn.Tag);
+        }
+
+        public void CreateIncomingFor(Node parent)
+        {
+
+        }
+
+        public void CreateSiblingFor(Node parent)
+        {
+
         }
     }
     

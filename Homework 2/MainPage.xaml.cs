@@ -88,13 +88,14 @@ namespace Homework_2
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             Splitter.IsPaneOpen = !Splitter.IsPaneOpen;
-            
+
         }
 
         private async void LoadInitTree(object sender, RoutedEventArgs e)
         {
             bool result = await tree.LoadInitFile();
-            if (result) { 
+            if (result)
+            {
                 tree.Play();
             }
         }
@@ -104,6 +105,51 @@ namespace Homework_2
             tree.RefreshUI();
         }
 
+        public void TreeNode_Click(object sender, RoutedEventArgs e)
+        {
+            var button = (Button)sender;
+            var node = (MixerTree.Node)button.Tag;
+            tree.editingNode = node;
+            // force open panel
+            Splitter.IsPaneOpen = true;
+            LinkPanel.Visibility = Visibility.Visible;
+            // open effect panel for input/mixer
+            if (node.type == MixerTree.NodeType.Input || node.type == MixerTree.NodeType.Mixer)
+            {
+                EffectPanel.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                EffectPanel.Visibility = Visibility.Collapsed;
+            }
+            // open input panel for input
+            if (node.type == MixerTree.NodeType.Input)
+            {
+                InputPanel.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                InputPanel.Visibility = Visibility.Collapsed;
+            }
+            // enable sibling button for mixer and incoming
+            ButtonCreateSibling.IsEnabled = node.type == MixerTree.NodeType.Input || node.type == MixerTree.NodeType.Mixer;
+            // enable incoming for mixer and output
+            ButtonCreateIncoming.IsEnabled = node.type == MixerTree.NodeType.Output || node.type == MixerTree.NodeType.Mixer;
+        }
+
+        public void LinkButton_Incoming_Click(object sender, RoutedEventArgs e)
+        {
+            var button = (Button)sender;
+            var node = (MixerTree.Node)button.Tag;
+            tree.CreateIncomingFor(node);
+        }
+
+        private void LinkButton_Sibling_Click(object sender, RoutedEventArgs e)
+        {
+            var button = (Button)sender;
+            var node = (MixerTree.Node)button.Tag;
+            tree.CreateSiblingFor(node);
+        }
     }
 
     public enum NotifyType
