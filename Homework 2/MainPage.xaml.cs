@@ -99,10 +99,11 @@ namespace Homework_2
             }
         }
 
-        private void RefreshTree(object sener, RoutedEventArgs e)
+        private void RefreshTree(object sender, RoutedEventArgs e)
         {
             tree.RefreshUI();
         }
+
     }
 
     public enum NotifyType

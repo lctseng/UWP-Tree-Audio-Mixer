@@ -8,6 +8,8 @@ using Windows.Media.Render;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using Windows.System;
+using Windows.UI;
+using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Shapes;
@@ -15,8 +17,11 @@ using Windows.UI.Xaml.Shapes;
 namespace Homework_2
 {
 
-    class MixerTree
+    public class MixerTree
     {
+
+        const int BUTTON_WIDTH = 150;
+        const int BUTTON_HEIGHT = 50;
 
         private MainPage rootPage;
         private Canvas displayCanvas;
@@ -33,7 +38,8 @@ namespace Homework_2
             Input, Output, Mixer
         }
 
-        class Node {
+
+        public class Node {
             public List<Node> outGoingNodes;
             public List<Node> incomingNodes;
             
@@ -59,8 +65,8 @@ namespace Homework_2
             public virtual Button CreateUIButtom() {
                 var btn = currentButton = new Button();
                 btn.Content = "Dummy Node";
-                btn.Width = 150;
-                btn.Height = 50;
+                btn.Width = BUTTON_WIDTH;
+                btn.Height = BUTTON_HEIGHT;
                 return btn;
             }
 
@@ -147,9 +153,19 @@ namespace Homework_2
             public override Button CreateUIButtom()
             {
                 var btn = base.CreateUIButtom();
-                btn.Content = "Mixer";
+                btn.Width = BUTTON_HEIGHT;
+                btn.Content = "Mix";
+                btn.Background = new SolidColorBrush(Colors.DarkCyan);
                 return btn;
             }
+        }
+
+        class MixerAnchor {
+            public Node src;
+            public Node dst;
+            public Button anchor;
+            public Line line1, line2;
+            public double centerX, centerY;
         }
 
 
@@ -302,7 +318,7 @@ namespace Homework_2
                     var button = node.CreateUIButtom();
                     var margin = button.Margin;
                     margin.Left = (node.sortIndex - 1) * 250;
-                    margin.Top = i * 100;
+                    margin.Top = i * 150;
                     button.Margin = margin;
                     displayCanvas.Children.Add(button);
                     Canvas.SetZIndex(button, node.sortIndex);
@@ -313,16 +329,101 @@ namespace Homework_2
         }
 
         private void DrawEdge(Node src, Node dst) {
-            var line1 = new Line();
-            line1.StrokeThickness = 10;
-            line1.Stroke = new SolidColorBrush(Windows.UI.Color.FromArgb(60,255,0,0));
-            line1.X1 = src.currentButton.Margin.Left + src.currentButton.Width / 2;
-            line1.Y1 = src.currentButton.Margin.Top + src.currentButton.Height / 2;
-            line1.X2 = dst.currentButton.Margin.Left + dst.currentButton.Width / 2 ;
-            line1.Y2 = dst.currentButton.Margin.Top + dst.currentButton.Height / 2; ;
-            displayCanvas.Children.Add(line1);
-            Canvas.SetZIndex(line1, 0);
+
+            double startX = GetCenterX(src.currentButton);
+            double startY = GetCenterY(src.currentButton);
+            double endX = GetCenterX(dst.currentButton);
+            double endY = GetCenterY(dst.currentButton);
+            double midX = (startX + endX) / 2;
+            double midY = (startY + endY) / 2;
+
+            // line1 : src to mid
+            var line1 = DrawLine(startX - BUTTON_WIDTH / 2, startY, midX + BUTTON_HEIGHT / 2, midY);
+            // line2 : mid to dst
+            var line2 = DrawLine(midX - BUTTON_HEIGHT / 2, midY, endX + BUTTON_WIDTH / 2, endY);
+            // mixer anchor 
+            var anchor = DrawMixerAnchor(midX, midY);
+            var data = (MixerAnchor)anchor.Tag;
+            data.line1 = line1;
+            data.line2 = line2;
+            data.src = src;
+            data.dst = dst;
+
+
+
         }
 
+        private Button DrawMixerAnchor(double posX, double posY)
+        {
+            var button = new Button();
+            button.Background = new SolidColorBrush(Colors.DarkOliveGreen);
+            button.Content = "+";
+            button.Width = BUTTON_HEIGHT;
+            button.Height = BUTTON_HEIGHT;
+            var margin = button.Margin;
+            margin.Left = posX - BUTTON_HEIGHT / 2;
+            margin.Top = posY - BUTTON_HEIGHT / 2;
+            button.Margin = margin;
+            button.Click += MixerAnchor_Click;
+
+            var data = new MixerAnchor();
+            data.anchor = button;
+            data.centerX = posX;
+            data.centerY = posY;
+            button.Tag = data;
+
+            Canvas.SetZIndex(button, 90);
+            displayCanvas.Children.Add(button);
+            return button;
+
+        }
+
+        private Line DrawLine(double startX, double startY, double endX, double endY)
+        {
+            var line1 = new Line();
+            line1.StrokeThickness = 5;
+            line1.Stroke = new SolidColorBrush(Windows.UI.Color.FromArgb(60, 255, 0, 0));
+            line1.X1 = startX;
+            line1.Y1 = startY;
+            line1.X2 = endX;
+            line1.Y2 = endY;
+            displayCanvas.Children.Add(line1);
+            Canvas.SetZIndex(line1, 0);
+            return line1;
+        }
+
+        public double GetCenterX(FrameworkElement e)
+        {
+            return e.Margin.Left + e.Width / 2; 
+        }
+
+        public double GetCenterY(FrameworkElement e)
+        {
+            return e.Margin.Top + e.Height / 2;
+        }
+
+        private void CreateMixerFromClick(MixerAnchor anchorData)
+        {
+            // create btn
+            var mixer = new MixerNode();
+            var btn = mixer.CreateUIButtom();
+            displayCanvas.Children.Add(btn);
+            // positioning
+            var margin = btn.Margin;
+            margin.Left = anchorData.centerX - BUTTON_HEIGHT / 2;
+            margin.Top = anchorData.centerY - BUTTON_HEIGHT / 2;
+
+            btn.Margin = margin;
+        }
+
+        public void MixerAnchor_Click(object sender, RoutedEventArgs e)
+        {
+            Button btn = (Button)(sender);
+            // hide anchor
+            displayCanvas.Children.Remove(btn);
+            // Create mixer
+            CreateMixerFromClick((MixerAnchor)btn.Tag);
+        }
     }
+    
 }
