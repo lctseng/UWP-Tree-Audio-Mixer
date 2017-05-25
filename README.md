@@ -10,7 +10,12 @@
 # 開發工具與部署
 本程式使用 Visual Studio 2015 環境，並且依循UWP框架開發。因此必須要使用 Windows 10 以上的電腦才有辦法執行此程式。
 在有安裝 Visual Studio 2015 UWP 開發環境的電腦中，僅需要開啟專案後即可編譯執行。若無，可以執行專案資料夾內`Homework 2/AppPackages/Homework 2_1.0.0.0_Debug_Test`內的`Add-AppDevPackage.ps1`這一個 PowerShell 指令程式來安裝此應用程式。
-若不幸無法正確執行，專案中也有附上範例操作影片（Demo.mp4）可供觀看。
+若不幸無法正確執行，專案中也有附上範例操作影片（`Demo.mp4`）可供觀看。
+
+# 示範影片
+除了專案中的`Demo.mp4`以外，您也可以到以下連結觀看。
+[Youtube 範例影片，無字幕](https://youtu.be/X1fS09LsgSU)
+[Youtube 範例影片，有字幕，但音效不同步](https://youtu.be/nFLAqz4Hocg)
 
 # 程式功能
 
