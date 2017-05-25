@@ -39,7 +39,7 @@ namespace Homework_2
             
         }
 
-        protected override async void OnNavigatedTo(NavigationEventArgs e)
+        protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             tree = new MixerTree(TreeDisplay);
             RefreshControlPanel(null);
@@ -470,8 +470,8 @@ namespace Homework_2
             {
                 if (tree.editingNode != null)
                 {
-                    //tree.editingNode.name = TextForNode.Text;
-                    //tree.editingNode.currentButton.Content = TextForNode.Text;
+                    tree.editingNode.name = TextForNode.Text;
+                    tree.editingNode.currentButton.Content = TextForNode.Text;
                 }
             }
         }

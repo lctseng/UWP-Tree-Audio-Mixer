@@ -19,9 +19,6 @@ namespace Homework_2
 
     public class MixerTree : IDisposable
     {
-
-        public static int btnCounter = 0;
-
         const int BUTTON_WIDTH = 150;
         const int BUTTON_HEIGHT = 50;
 
@@ -70,7 +67,7 @@ namespace Homework_2
                 outGoingNodes = new List<Node>();
                 incomingNodes = new List<Node>();
                 elementHeight = 0;
-                serial = btnCounter++;
+                serial = 0;
                 name = "Dummy Node";
                 limiterEnabled = false;
                 eqEnabled = false;
@@ -113,22 +110,15 @@ namespace Homework_2
                     audioNode.Dispose();
                 }
             }
-
-            public void Dispose()
-            {
-                if (audioNode != null)
-                {
-                    audioNode.Dispose();
-                }
-            }
         }
 
         public class InputNode : Node
         {
-
+            public static int btnCounter = 0;
 
             public InputNode()
             {
+                serial = ++btnCounter;
                 type = NodeType.Input;
                 name = "Input File " + serial;
             }
@@ -169,8 +159,12 @@ namespace Homework_2
 
         public class OutputNode : Node
         {
+
+            public static int btnCounter = 0;
+
             public OutputNode()
             {
+                serial = ++btnCounter;
                 type = NodeType.Output;
                 name = "Output Device";
             }
@@ -195,8 +189,12 @@ namespace Homework_2
 
         public class MixerNode : Node
         {
+
+            public static int btnCounter = 0;
+
             public MixerNode()
             {
+                serial = ++btnCounter;
                 type = NodeType.Mixer;
                 name = "Mixer " + serial;
             }
